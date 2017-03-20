@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script>
+            var wsUri = "ws://localhost:8080/WebApplication8/sample"
+            $(document).ready(function() {
+                var websocket = new WebSocket(wsUri);
+                websocket.onmessage = function(evt) {
+                    if (typeof evt.data !== 'undefined') {
+                        var json = $.parseJSON(evt.data);
+                        for (var i = 0; i < json.length; i++) {
+                            $('#chatwindow').append('<p>' +
+                                    '<span class="timestamp">' + json[i].timestamp + '</span> ' +
+                                    '<span class="nickname">[' + json[i].nickname + ']</span> ' +
+                                    json[i].message + 
+                                    '</p>');
+                        }                        
+                    }
+                };
+                
+                $('#send').click(function() {
+                    if (websocket.readyState !== 1) {
+                        $('#chatwindow').html('');
+                        websocket = new WebSocket(wsUri);
+                    }
+                    var data = {
+                        timestamp: new Date().toISOString(),
+                        nickname: $('#nickname').val(),
+                        message: $('#input').val()
+                    }
+                    var json = JSON.stringify(data);
+                    websocket.send(json);
+                    $('#input').val('');
+                });
+            });
+        </script>
+        <p>Nickname: <input id="nickname" /></p>
+        <div><input id="input" /> <button id="send">Send</button></div>
+        <div id="chatwindow"></div>
+    </body>
+</html>
